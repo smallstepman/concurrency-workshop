@@ -1,8 +1,15 @@
 [package]
-name = "green-threads-sandbox"
+name = "concurrency-sandbox"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+members = [
+    "01-hello-context-switching",
+    "02-hello-green-threads"
+]
 
-[dependencies]
+[[bin]]
+name = "green-threads-sandbox"
+path = "01-hello-context-switching/src/main.rs"

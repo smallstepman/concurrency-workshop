@@ -7,7 +7,8 @@ edition = "2021"
 [workspace]
 members = [
     "01-hello-context-switching",
-    "02-hello-green-threads"
+    "02-hello-green-threads",
+    "03-syscalls"
 ]
 
 [[bin]]

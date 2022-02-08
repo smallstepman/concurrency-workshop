@@ -6,11 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace]
 members = [
-    "01-hello-context-switching",
-    "02-hello-green-threads",
-    "03-syscalls"
+    "01-asm-execution-context",
+    "02-asm-green-threads",
+    "03-syscalls",
+    "04-epoll"
 ]
 
 [[bin]]
 name = "green-threads-sandbox"
-path = "01-hello-context-switching/src/main.rs"
+path = "01-asm-execution-context/src/main.rs"

@@ -1,5 +1,5 @@
 // https://cfsamsonbooks.gitbook.io/epoll-kqueue-iocp-explained/part-1-an-express-explanation/the-basics
-use std::io::{self, Write};
+use std::io::Write;
 use std::net::TcpStream;
 use std::os::unix::io::AsRawFd;
 
@@ -16,7 +16,7 @@ mod ffi {
         pub fn epoll_wait(epfd: i32, events: *mut Event, maxevents: i32, timeout: i32) -> i32;
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Copy, Clone)]
     #[repr(C, packed)]
     pub struct Event {
         pub(crate) events: u32,
@@ -36,9 +36,6 @@ fn main() {
     let mut event_counter = 0;
 
     let queue = unsafe { ffi::epoll_create(1) };
-    if queue < 0 {
-        panic!("{}", io::Error::last_os_error());
-    }
 
     let mut streams = vec![];
 
@@ -61,22 +58,16 @@ fn main() {
             events: (ffi::EPOLLIN | ffi::EPOLLONESHOT) as u32,
             epoll_data: i,
         };
-        let res =
-            unsafe { ffi::epoll_ctl(queue, ffi::EPOLL_CTL_ADD, stream.as_raw_fd(), &mut event) };
-        if res < 0 {
-            panic!("{}", io::Error::last_os_error());
-        }
 
-        streams.push(stream);
+        unsafe { ffi::epoll_ctl(queue, ffi::EPOLL_CTL_ADD, stream.as_raw_fd(), &mut event) };
+
+        streams.push(stream); // stops from dropping (& closing) the stream
         event_counter += 1;
     }
 
     while event_counter > 0 {
         let mut events = Vec::with_capacity(10);
         let res = unsafe { ffi::epoll_wait(queue, events.as_mut_ptr(), 10, -1) };
-        if res < 0 {
-            panic!("{}", io::Error::last_os_error());
-        }
         unsafe { events.set_len(res as usize) };
         for event in events {
             println!("RECEIVED: {:?}", event);
@@ -84,9 +75,6 @@ fn main() {
         }
     }
 
-    let res = unsafe { ffi::close(queue) };
-    if res < 0 {
-        panic!("{}", io::Error::last_os_error());
-    }
+    unsafe { ffi::close(queue) };
     println!("finished");
 }
